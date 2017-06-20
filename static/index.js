@@ -9566,8 +9566,8 @@ var Form = function (_React$Component) {
                 { className: "row" },
                 _react2.default.createElement(
                     "form",
-                    { method: "post", encType: "multipart/form-data", multilple: true },
-                    _react2.default.createElement("input", { className: "form-control", type: "file", name: "file" }),
+                    { className: "form-inline", method: "post", encType: "multipart/form-data" },
+                    _react2.default.createElement("input", { className: "form-control", type: "file", name: "files[]", multiple: true }),
                     _react2.default.createElement("input", { className: "form-control", type: "submit", value: "Upload" })
                 )
             );

@@ -7,7 +7,7 @@
         <script src="/static/react.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="/static/bootstrap.min.css" type="text/css" media="all" />
         <style type="text/css" media="all">
-.result {
+.panel {
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
@@ -19,12 +19,28 @@
                 <h2>Docbooker</h2>
                 <p>Upload your xml files</p>
             </center>
-            <div class="container" id="app"></div>
+
+            <div class="container" id="app">
+            </div>
+
             {% if fileurl %}
-            <div class="panel panel-default result">
+            <div class="panel panel-default">
                 <div class="panel-body">
                     <span> Your document: <a href="{{fileurl}}" download>{{fileurl}}</a> </span>
+                    <a href="{{fileurl}}" >preview</a>
                 </div>
+            </div>
+            {% endif %}
+            {% if error %}
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <span>{{error.title}}</span>
+                </div>
+                {% if error.body %}
+                <div class="panel-body">
+                    <span>{{error.body}}</span>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
         </div>
