@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Docbooker</title>
+        <script src="/static/react.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" href="/static/bootstrap.min.css" type="text/css" media="all" />
+        <style type="text/css" media="all">
+.result {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+        </style>
+    </head>
+    <body>
+        <div class="container jumbotron">
+            <center>
+                <h2>Docbooker</h2>
+                <p>Upload your xml files</p>
+            </center>
+            <div class="container" id="app"></div>
+            {% if fileurl %}
+            <div class="panel panel-default result">
+                <div class="panel-body">
+                    <span> Your document: <a href="{{fileurl}}" download>{{fileurl}}</a> </span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <script src="{{static_url}}/index.js" type="text/javascript" charset="utf-8"></script>
+    </body>
+</html>
