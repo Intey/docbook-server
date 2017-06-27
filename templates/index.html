@@ -38,7 +38,9 @@
                 </div>
                 {% if error.body %}
                 <div class="panel-body">
-                    <span>{{error.body}}</span>
+                    {% autoescape false %}
+                    <span>{{error.body| replace('\n', '<br/>')}}</span>
+                    {% endautoescape %}
                 </div>
                 {% endif %}
             </div>
