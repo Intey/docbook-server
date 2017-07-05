@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "$(npm bin)/webpack-dev-server --inline --hot --port 3000",
+    "build": "$(npm bin)/webpack",
     "test": ""
   },
   "repository": {
