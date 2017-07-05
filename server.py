@@ -28,12 +28,18 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 def indir(dir):
+    """decorator for run some function in specific directory 'dir'. after
+    decorate, before run this target function, os change dir to 'dir' and after
+    exit from it"""
     def real_dec(func):
         def wrapper(*args):
             pwd = os.path.abspath(os.path.curdir)
             os.chdir(dir)
-            result = func(*args)
-            os.chdir(pwd)
+            try:
+                result = func(*args)
+            except Exception as e:
+                os.chdir(pwd)
+                raise e
             return result
         return wrapper
     return real_dec
