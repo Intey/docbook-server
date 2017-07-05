@@ -13,7 +13,7 @@ from werkzeug import secure_filename
 pwd = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(pwd, "uploads")
-ALLOWED_EXTENSIONS = set(['.xml'])
+ALLOWED_EXTENSIONS = set(['.xml', '.yaml'])
 BUILD_DIR = os.path.join(pwd, "build")
 
 static_url = '/static'
@@ -26,6 +26,14 @@ if os.environ.get("DEV"):
 app = Flask(__name__, static_url_path='/static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+
+
+
+def file_ext(filename):
+    """ returns filename and extension """
+    return os.path.splitext(os.path.basename(filename))[1].lower()
+
 
 def indir(dir):
     """decorator for run some function in specific directory 'dir'. after
@@ -61,22 +69,20 @@ def allowed_file(filename):
     Checks that filename contains dot and it's extension in allowed extensions
     """
     return os.path.extsep in filename and \
-            os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
+            file_ext(filename) in ALLOWED_EXTENSIONS
 
 
 def make_error(title, body):
     return {"title": title, "body": body}
 
-def generate_pdf(filepaths):
-    # FIXME: single file mode
-    if len(filepaths) > 1:
-        return None, "Can't generate pdf from many files. Wait later version"
-    if len(filepaths) == 0:
-        return None, "Can't generate pdf from void"
-
-    filepath = filepaths[0]
+def generate_pdf(filepath):
     dest_dir = os.path.join(pwd, 'build')
-    dest_file = os.path.join(dest_dir, 'data.xml')
+    ext = file_ext(filepath) # for make target name by ext
+    target = ext.strip(os.path.extsep)
+
+    filename = os.path.basename(filepath)  # name + ext
+
+    dest_file = os.path.join(dest_dir, filename)
     os.makedirs(dest_dir, exist_ok=True)
     try:
         print("copy", filepath, dest_file)
@@ -85,11 +91,11 @@ def generate_pdf(filepaths):
         return None,"Error when prepare build: %s" % e
 
     @indir(dest_dir)
-    def make():
+    def make(target):
         resultfile = None
         errors = None
         try:
-            output = check_output(['make'], stderr=STDOUT).decode('utf-8')
+            output = check_output(['make', target], stderr=STDOUT).decode('utf-8')
             # last rule(Makefile: where fop called) echoing it's name - pdf name
             print(output)
             resultfile = output.splitlines()[-1]
@@ -99,7 +105,7 @@ def generate_pdf(filepaths):
         finally:
             return resultfile, errors
 
-    return make()
+    return make(target)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -127,7 +133,7 @@ def upload_file():
             if len(uploaded_files) == 1:
                 file = uploaded_files[0]
                 uploaded_file = save_file(file)
-                generated_filename, errors = generate_pdf([uploaded_file])
+                generated_filename, errors = generate_pdf(uploaded_file)
 
                 if generated_filename is not None:
                     generated_filepath = os.path.join(BUILD_DIR, generated_filename)
