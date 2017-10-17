@@ -28,14 +28,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
-
-
 def file_ext(filename):
     """ returns filename and extension """
     return os.path.splitext(os.path.basename(filename))[1].lower()
 
 
-def indir(dir):
+def runIndir(dir):
     """decorator for run some function in specific directory 'dir'. after
     decorate, before run this target function, os change dir to 'dir' and after
     exit from it"""
@@ -75,6 +73,7 @@ def allowed_file(filename):
 def make_error(title, body):
     return {"title": title, "body": body}
 
+
 def generate_pdf(filepath):
     dest_dir = os.path.join(pwd, 'build')
     ext = file_ext(filepath) # for make target name by ext
@@ -90,7 +89,7 @@ def generate_pdf(filepath):
     except Exception as e:
         return None,"Error when prepare build: %s" % e
 
-    @indir(dest_dir)
+    @runIndir(dest_dir)
     def make(target):
         resultfile = None
         errors = None
@@ -108,11 +107,7 @@ def generate_pdf(filepath):
     return make(target)
 
 
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    fileurl = None
-    error = None
-    if request.method == 'POST':
+def processPost(request):
         if FILES_KEY not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -149,6 +144,14 @@ def upload_file():
         else:
             error = make_error("Wrong files", "files (%s) not allowed" % ', '.join(not_allowed_files))
 
+
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    fileurl = None
+    error = None
+    if request.method == 'POST':
+        processPost(request)
     return render_template('index.html', static_url=static_url, fileurl=fileurl, error=error)
 
 
