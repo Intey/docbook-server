@@ -3,23 +3,24 @@
 
 import os
 import sys
-from subprocess import check_output, CalledProcessError, STDOUT
-from functools import reduce
+
 import shutil
 
 from flask import Flask, flash, send_from_directory, request, redirect, url_for, render_template
 from werkzeug import secure_filename
 
+from utils import allowed_file, file_ext, run_in_dir, generate_pdf
+
 pwd = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(pwd, "uploads")
-ALLOWED_EXTENSIONS = set(['.xml', '.yaml'])
 BUILD_DIR = os.path.join(pwd, "build")
 
 static_url = '/static'
 
 FILES_KEY='files[]'
 
+# in dev use webpack
 if os.environ.get("DEV"):
     static_url = 'http://localhost:3000/static/js'
 
@@ -27,28 +28,6 @@ app = Flask(__name__, static_url_path='/static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-
-def file_ext(filename):
-    """ returns filename and extension """
-    return os.path.splitext(os.path.basename(filename))[1].lower()
-
-
-def runIndir(dir):
-    """decorator for run some function in specific directory 'dir'. after
-    decorate, before run this target function, os change dir to 'dir' and after
-    exit from it"""
-    def real_dec(func):
-        def wrapper(*args):
-            pwd = os.path.abspath(os.path.curdir)
-            os.chdir(dir)
-            try:
-                result = func(*args)
-            except Exception as e:
-                os.chdir(pwd)
-                raise e
-            return result
-        return wrapper
-    return real_dec
 
 
 def log_error(*args):
@@ -62,103 +41,69 @@ def save_file(file):
     return filepath
 
 
-def allowed_file(filename):
-    """
-    Checks that filename contains dot and it's extension in allowed extensions
-    """
-    return os.path.extsep in filename and \
-            file_ext(filename) in ALLOWED_EXTENSIONS
-
-
 def make_error(title, body):
     return {"title": title, "body": body}
 
 
-def generate_pdf(filepath):
-    dest_dir = os.path.join(pwd, 'build')
-    ext = file_ext(filepath) # for make target name by ext
-    target = ext.strip(os.path.extsep)
+def process_post(request):
+    if FILES_KEY not in request.files:
+        flash('No file part')
+        return redirect(request.url)
 
-    filename = os.path.basename(filepath)  # name + ext
+    uploaded_files = request.files.getlist(FILES_KEY)
+    if len(uploaded_files) == 0:
+        flash('No selected file')
+        return redirect(request.url)
 
-    dest_file = os.path.join(dest_dir, filename)
-    os.makedirs(dest_dir, exist_ok=True)
-    try:
-        print("copy", filepath, dest_file)
-        shutil.copy(filepath, dest_file)
-    except Exception as e:
-        return None,"Error when prepare build: %s" % e
+    all_files_allowed = True
+    not_allowed_files = []
+    for filename in map(lambda x: x.filename, uploaded_files):
+        if not allowed_file(filename):
+            all_files_allowed = False
+            not_allowed_files.append(filename)
 
-    @runIndir(dest_dir)
-    def make(target):
-        resultfile = None
-        errors = None
-        try:
-            output = check_output(['make', target], stderr=STDOUT).decode('utf-8')
-            # last rule(Makefile: where fop called) echoing it's name - pdf name
-            print(output)
-            resultfile = output.splitlines()[-1]
-            print("pdf succesfully generated", resultfile)
-        except CalledProcessError as e:
-            errors = e.stdout.decode('utf-8').splitlines()
-        finally:
-            return resultfile, errors
+    if all_files_allowed:
+        if len(uploaded_files) == 1:
+            file = uploaded_files[0]
+            uploaded_file = save_file(file)
+            generated_filename, errors = generate_pdf(uploaded_file)
 
-    return make(target)
-
-
-def processPost(request):
-        if FILES_KEY not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-
-        uploaded_files = request.files.getlist(FILES_KEY)
-        if len(uploaded_files) == 0:
-            flash('No selected file')
-            return redirect(request.url)
-
-        all_files_allowed = True
-        not_allowed_files = []
-        for filename in map(lambda x: x.filename, uploaded_files):
-            if not allowed_file(filename):
-                all_files_allowed = False
-                not_allowed_files.append(filename)
-
-        if all_files_allowed:
-            if len(uploaded_files) == 1:
-                file = uploaded_files[0]
-                uploaded_file = save_file(file)
-                generated_filename, errors = generate_pdf(uploaded_file)
-
-                if generated_filename is not None:
-                    generated_filepath = os.path.join(BUILD_DIR, generated_filename)
-                    try:
-                        shutil.copy(generated_filepath, UPLOAD_FOLDER)
-                        fileurl = url_for('uploaded_file', filename=os.path.basename(generated_filepath))
-                    except Exception as e:
-                        log_error(e)
-                        error = make_error("Make url for file", e)
-                else:
-                    log_error(errors)
-                    error = make_error("can't generate pdf", "\n".join(errors))
-        else:
-            error = make_error("Wrong files", "files (%s) not allowed" % ', '.join(not_allowed_files))
+            if generated_filename is not None:
+                generated_filepath = os.path.join(BUILD_DIR, generated_filename)
+                try:
+                    shutil.copy(generated_filepath, UPLOAD_FOLDER)
+                    fileurl = url_for('uploaded_file', filename=os.path.basename(generated_filepath))
+                except Exception as e:
+                    log_error(e)
+                    error = make_error("Make url for file", e)
+            else:
+                log_error(errors)
+                error = make_error("can't generate pdf", "\n".join(errors))
+    else:
+        error = make_error("Wrong files", "files (%s) not allowed" % ', '.join(not_allowed_files))
 
 
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def upload_file():
-    fileurl = None
     error = None
-    if request.method == 'POST':
-        processPost(request)
-    return render_template('index.html', static_url=static_url, fileurl=fileurl, error=error)
+    return render_template('index.html', static_url=static_url)
 
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
+@app.route('/from-files', methods=['POST'])
+def from_file():
+    process_post(request)
+    return render_template('index.html', static_url=static_url, fileurl=fileurl, error=error)
+
+
+@app.route('/from-form', methods=['POST'])
+def from_form():
+    process_post(request)
+    return render_template('index.html', static_url=static_url, fileurl=fileurl, error=error)
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['UPLOAD_FOLDER']):

@@ -4,23 +4,25 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <title>Docbooker</title>
-        <script src="/static/react.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="/static/bootstrap.min.css" type="text/css" media="all" />
         <style type="text/css" media="all">
-.panel {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
+            .panel {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+            }
+            .center {
+
+            }
         </style>
     </head>
     <body>
         <div class="container jumbotron">
-            <center>
+            <div class="center">
                 <h2>Docbooker</h2>
                 <p>Upload your xml files</p>
-            </center>
+            </div>
 
-            <div class="container" id="app">
+            <div class="center container" id="app">
             </div>
 
             {% if fileurl %}
