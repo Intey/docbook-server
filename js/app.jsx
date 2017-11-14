@@ -84,9 +84,6 @@ export default class App extends React.Component {
             <input className="form-control" type="file" name="files[]" multiple/>
           </div>
           <div className="form-group">
-            <input className="form-control" type="text" name="username" placeholder="username"/>
-          </div>
-          <div className="form-group">
             <input className="form-control btn-primary" type="submit" value="Upload"/>
           </div>
         </form>
@@ -193,10 +190,14 @@ export default class App extends React.Component {
           </ul>
           <div className="tab-content">
             <div id="form" className="tab-pane fade in active" role="tabpanel">
-              {formTab}
+              <div className="container">
+                {formTab}
+              </div>
             </div>
             <div id="file" className="tab-pane fade" role="tabpanel">
-              {fileTab}
+              <div className="container">
+                {fileTab}
+              </div>
             </div>
           </div>
         </div>
