@@ -32,7 +32,7 @@ export default class App extends React.Component {
       console.log("xml")
       // collectForm data
       
-      let formMap = parseForm(document.querySelector('.form-horizontal'))
+      let formMap = this.parseForm(document.querySelector('.form-horizontal'))
 
       let doc = document.implementation.createDocument(null, "root");
       let rootNode = doc.children[0]
