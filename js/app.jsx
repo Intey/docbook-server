@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import { createDateElement } from 'utils'
+import { createDateElement, generateXML, loadFormMapFromXML } from 'utils'
 import 'jquery'
 import 'bootstrap'
 import URLS from 'api'
@@ -29,60 +29,18 @@ export default class App extends React.Component {
       }, {})
     }
 
-    generateXML = () => {
-      console.log("xml")
+    saveXML = () => {
       // collectForm data
-      
       let formMap = this.parseForm(document.querySelector('.form-horizontal'))
-
-      let doc = document.implementation.createDocument(null, "root");
-      let rootNode = doc.children[0]
-
-      const createElement = doc.createElement.bind(doc)
-      let fromDate = createDateElement(createElement, formMap['from-date'])
-      let today = createDateElement(createElement, formMap['today-date'])
-
-      rootNode.appendChild(today)
-      rootNode.appendChild(fromDate)
-
+      let rootNode = generateXML(formMap)
       const newfile = 'data:application/octet-stream;charset=utf-8;base64,'
       const serializer = new XMLSerializer()
       const content = serializer.serializeToString(rootNode)
       window.open(newfile+btoa(content))
-      // <root>
-      //   <type>save</type>
-      //   <today>
-      //     <year>2017</year>
-      //     <month>августа</month>
-      //     <day>10</day>
-      //   </today>
-      //   <time>
-      //     <from>
-      //       <year>2017</year>
-      //       <month>июня</month>
-      //       <day>01</day>
-      //       <hour>9</hour>
-      //       <minute>00</minute>
-      //     </from>
-      //     <count>14</count>
-      //   </time>
-      //   <sector>
-      //     <id>01054-1</id>
-      //     <iam>
-      //       <surname>Чурин</surname>
-      //       <name>Дмитрий</name>
-      //       <patronymic>Романович</patronymic>
-      //       <prof>инженер-программист</prof>
-      //       <cat>1</cat>
-      //     </iam>
-      //   </sector>
-      // </root>
-
-
     }
 
     loadXML = () => {
-
+      loadFormMapFromXML(null)
     }
 
     renderFileInputTab = () => {
