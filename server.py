@@ -29,7 +29,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
-
 def log_error(*args):
     print("ERROR:", *args, file=sys.stderr)
 
@@ -94,7 +93,7 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-@app.route('/from-files', methods=['POST'])
+@app.route('/from-file', methods=['POST'])
 def from_file():
     process_post(request)
     return render_template('index.html', static_url=static_url, fileurl=fileurl, error=error)
