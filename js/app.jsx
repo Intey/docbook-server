@@ -98,18 +98,17 @@ export default class App extends React.Component {
       return (
         <form action={URLS.formForm} method="post" className="form-horizontal">
           <div className="form-group">
-          <div className="form-group">
             <label for="today-date">Сегодня</label>
             <input className="form-control" type="date" name="today-date"/>
           </div>
-          <select defaultValue="save" className="form-control" name="stat-type" id="stat-type" onChange={this.typeChange}>
-            <option value="save">оплачиваемый</option>
-            <option value="nosave">за свой счет</option>
-            <option value="hours">на пару часов</option>
-            {/* <option value="move">перенос оплачиваемого</option> */}
-            <option value="empty">пустое</option>
-          </select>
-
+          <div className="form-group">
+            <select defaultValue="save" className="form-control" name="stat-type" id="stat-type" onChange={this.typeChange}>
+              <option value="save">оплачиваемый</option>
+              <option value="nosave">за свой счет</option>
+              <option value="hours">на пару часов</option>
+              {/* <option value="move">перенос оплачиваемого</option> */}
+              <option value="empty">пустое</option>
+            </select>
           </div>
           <div className="form-group">
             <input className="form-control" type="text" name="username"   placeholder = 'Имя'/>
@@ -136,7 +135,7 @@ export default class App extends React.Component {
           <input className="form-control btn-primary" type="submit" value="Upload"/>
         </div>
         <div className="form-group">
-          <button type="button" className="btn btn-default col-xs-6" onClick={this.generateXML}>Сохранить в XML</button>
+          <button type="button" className="btn btn-default col-xs-6" onClick={this.saveXML}>Сохранить в XML</button>
           <button type="button" className="btn btn-default col-xs-6" onClick={this.loadXML}>Загрузить из XML</button>
         </div>
         </form>
