@@ -3,6 +3,7 @@ import {connect} from 'react-redux'
 import { createDateElement } from 'utils'
 import 'jquery'
 import 'bootstrap'
+import URLS from 'api'
 
 export default class App extends React.Component {
     constructor(props)
@@ -86,7 +87,7 @@ export default class App extends React.Component {
 
     renderFileInputTab = () => {
       return (
-        <form action='/from-file' method="post" className="form-horizontal" encType="multipart/form-data" >
+        <form action={URLS.fromDate} method="post" className="form-horizontal" encType="multipart/form-data" >
           <div className="form-group">
             <input className="form-control" type="file" name="files[]" multiple/>
           </div>
@@ -137,7 +138,7 @@ export default class App extends React.Component {
 
     renderFormInputTab = () => {
       return (
-        <form action='/from-form' method="post" className="form-horizontal">
+        <form action={URLS.formForm} method="post" className="form-horizontal">
           <div className="form-group">
           <div className="form-group">
             <label for="today-date">Сегодня</label>
