@@ -178,8 +178,8 @@ export default class App extends React.Component {
           <input className="form-control btn-primary" type="submit" value="Upload"/>
         </div>
         <div className="form-group">
-          <button className="btn btn-default col-xs-6" onClick={this.generateXML}>Сохранить в XML</button>
-          <button className="btn btn-default col-xs-6" onClick={this.loadXML}>Загрузить из XML</button>
+          <button type="button" className="btn btn-default col-xs-6" onClick={this.generateXML}>Сохранить в XML</button>
+          <button type="button" className="btn btn-default col-xs-6" onClick={this.loadXML}>Загрузить из XML</button>
         </div>
         </form>
       )
