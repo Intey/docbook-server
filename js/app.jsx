@@ -16,7 +16,7 @@ export default class App extends React.Component {
 
     parseForm = (formElements) => {
       let inputs = Array.from(formElements)
-        .filter( e => e.type != 'submit' )
+        .filter( e => e.type != 'submit' && e.type != 'button' )
       return inputs.reduce( (acc, e) => {
         // skip no named
         if (!e.name) { 
@@ -37,10 +37,17 @@ export default class App extends React.Component {
       let doc = document.implementation.createDocument(null, "root");
       let rootNode = doc.children[0]
 
+      const createElement = doc.createElement.bind(doc)
+      let fromDate = createDateElement(createElement, formMap['from-date'])
+      let today = createDateElement(createElement, formMap['today-date'])
 
-      let fromDate = createDateElement(doc, formMap);
+      rootNode.appendChild(today)
       rootNode.appendChild(fromDate)
 
+      const newfile = 'data:application/octet-stream;charset=utf-8;base64,'
+      const serializer = new XMLSerializer()
+      const content = serializer.serializeToString(rootNode)
+      window.open(newfile+btoa(content))
       // <root>
       //   <type>save</type>
       //   <today>
@@ -132,6 +139,10 @@ export default class App extends React.Component {
       return (
         <form action='/from-form' method="post" className="form-horizontal">
           <div className="form-group">
+          <div className="form-group">
+            <label for="today-date">Сегодня</label>
+            <input className="form-control" type="date" name="today-date"/>
+          </div>
           <select defaultValue="save" className="form-control" name="stat-type" id="stat-type" onChange={this.typeChange}>
             <option value="save">оплачиваемый</option>
             <option value="nosave">за свой счет</option>
